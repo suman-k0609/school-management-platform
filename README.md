@@ -1,7 +1,7 @@
 # Algions AI Labs: School Management Platform
 ## Cloud Deployment & CI/CD – DevOps & Cloud Engineering Assessment
 
-[![CI/CD Pipeline](https://github.com/algions-candidate/school-management-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/algions-candidate/school-management-platform/actions)
+[![CI/CD Pipeline](https://github.com/suman-k0609/school-management-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/suman-k0609/school-management-platform/actions)
 [![Docker](https://img.shields.io/badge/docker-multi--stage-blue.svg)](Dockerfile)
 [![Node.js](https://img.shields.io/badge/node.js-v20%2B-green.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-16-blue.svg)](https://www.postgresql.org/)
@@ -204,3 +204,4 @@ See [ROLLBACK.md](ROLLBACK.md) for the complete operational rollback runbook cov
 - [Operations Runbook (SOPs)](RUNBOOK.md)
 - [Rollback Runbook](ROLLBACK.md)
 - [Algions Submission Report](SUBMISSION_REPORT.md)
+

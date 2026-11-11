@@ -8,14 +8,14 @@
 
 | Field | Candidate Details |
 | :--- | :--- |
-| **Student Name** | *[Insert Your Full Name Here]* |
+| **Student Name** | Suman Kumari |
 | **Registration Number** | *[Insert Your University Registration / Roll Number]* |
-| **University Email** | *[Insert Your Official Email Address]* |
+| **University Email** | sumankumari200603@gmail.com |
 | **Internship Role** | DevOps & Cloud Engineering |
 | **Assigned Project** | Cloud Deployment & CI/CD – School Management Platform |
-| **Repository URL** | *[Insert Your GitHub / GitLab Repository Link]* |
+| **Repository URL** | https://github.com/suman-k0609/school-management-platform |
 | **Primary Branch** | `main` |
-| **Final Commit ID** | *[Insert Latest Git Commit SHA, e.g. `git rev-parse HEAD`]* |
+| **Final Commit ID** | `f93099aa86421fa555a85348114de41db78f832b` |
 | **Demo Video Link (3–5 mins)**| *[Insert Loom / YouTube / Google Drive Video Link]* |
 | **Deployment URL** | `https://localhost` (Local Docker Compose deployment with Nginx TLS reverse proxy) |
 
@@ -199,3 +199,4 @@ When recording the required demonstration video, follow this exact step-by-step 
 - **Originality**: All configuration files, Dockerfiles, orchestration manifests, and test suites are authored specifically for this assessment.
 - **Credentials & Privacy**: No production secrets, personal credentials, or sensitive data have been committed. All secrets use placeholders via `.env.example`.
 - **Reproducibility**: The setup is deterministically reproducible on any clean machine equipped with Docker Engine and Docker Compose.
+
