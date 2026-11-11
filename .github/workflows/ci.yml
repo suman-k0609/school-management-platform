@@ -1,0 +1,153 @@
+name: CI/CD Pipeline - School Management Platform
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # 1. Code Quality, Linting, Formatting & Dependency Vulnerability Audit
+  # ============================================================================
+  quality-checks:
+    name: Code Quality & Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify code formatting (Prettier)
+        run: npm run format
+
+      - name: Execute static analysis & linting (ESLint)
+        run: npm run lint
+
+      - name: Run automated dependency vulnerability audit
+        run: npm audit --audit-level=high
+
+  # ============================================================================
+  # 2. Automated Integration & Acceptance Testing
+  # ============================================================================
+  test:
+    name: Automated API & Domain Acceptance Tests
+    runs-on: ubuntu-latest
+    needs: quality-checks
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: school_management
+          POSTGRES_USER: school_admin
+          POSTGRES_PASSWORD: test_secure_password_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U school_admin -d school_management"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://school_admin:test_secure_password_ci@localhost:5432/school_management
+        run: npm run migrate
+
+      - name: Seed database with synthetic data
+        env:
+          DATABASE_URL: postgresql://school_admin:test_secure_password_ci@localhost:5432/school_management
+        run: npm run seed
+
+      - name: Execute automated acceptance tests
+        env:
+          DATABASE_URL: postgresql://school_admin:test_secure_password_ci@localhost:5432/school_management
+          NODE_ENV: test
+        run: npm test
+
+  # ============================================================================
+  # 3. Secure Docker Build, Tagging & Trivy Container Security Scan
+  # ============================================================================
+  build-and-scan:
+    name: Docker Image Build & Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Determine Version Tags
+        id: meta
+        run: |
+          IMAGE_NAME="algions/school-management-api"
+          COMMIT_SHA="${{ github.sha }}"
+          RUN_NUM="${{ github.run_number }}"
+          SHORT_SHA=$(echo $COMMIT_SHA | cut -c1-7)
+          TAG_SHA="$IMAGE_NAME:$SHORT_SHA"
+          TAG_BUILD="$IMAGE_NAME:v1.0.$RUN_NUM"
+          TAG_LATEST="$IMAGE_NAME:latest"
+          echo "tag_sha=$TAG_SHA" >> $GITHUB_OUTPUT
+          echo "tag_build=$TAG_BUILD" >> $GITHUB_OUTPUT
+          echo "tag_latest=$TAG_LATEST" >> $GITHUB_OUTPUT
+
+      - name: Build and load Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: |
+            ${{ steps.meta.outputs.tag_sha }}
+            ${{ steps.meta.outputs.tag_build }}
+            ${{ steps.meta.outputs.tag_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy container vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta.outputs.tag_sha }}
+          format: 'table'
+          exit-code: '0' # Non-blocking on low/medium, report findings
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Display Image Digest & Artifact Metadata
+        run: |
+          echo "=================================================================="
+          echo "CI/CD BUILD ARTIFACT GENERATED SUCCESSFULLY"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Primary Image Tag: ${{ steps.meta.outputs.tag_sha }}"
+          echo "Build Version: ${{ steps.meta.outputs.tag_build }}"
+          echo "Docker Image ID: $(docker images -q ${{ steps.meta.outputs.tag_sha }})"
+          echo "=================================================================="

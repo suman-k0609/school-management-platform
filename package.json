@@ -1,0 +1,45 @@
+{
+  "name": "school-management-api",
+  "version": "1.0.0",
+  "description": "Production-grade School Management Platform API (Student, Class, and Attendance Service) with CI/CD and Observability",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/**/*.test.js",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --check \"src/**/*.js\" \"tests/**/*.js\"",
+    "format:fix": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
+    "seed": "node src/db/seed.js",
+    "migrate": "node src/db/migrations.js"
+  },
+  "keywords": [
+    "school-management",
+    "attendance",
+    "devops",
+    "docker",
+    "ci-cd",
+    "kubernetes",
+    "observability"
+  ],
+  "author": "DevOps Candidate",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+
