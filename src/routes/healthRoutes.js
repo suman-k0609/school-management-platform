@@ -26,12 +26,16 @@ router.get('/', (req, res) => {
         attendance: `${config.apiPrefix}/attendance`,
         auditLogs: `${config.apiPrefix}/audit-logs`,
       },
-      documentation: 'https://github.com/algions-candidate/school-management-platform',
+      documentation: 'https://github.com/suman-k0609/school-management-platform',
     });
   }
 
-  // Interactive HTML Dashboard for browsers
+  // Prevent browser caching so updates reflect immediately
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,10 +65,10 @@ router.get('/', (req, res) => {
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; margin-bottom: 24px; }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .card-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
-    .btn { background: var(--primary); color: #0b1120; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; transition: all 0.2s; text-align: center; }
+    .btn { background: var(--primary); color: #0b1120; border: none; padding: 12px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; transition: all 0.2s; text-align: center; }
     .btn:hover { opacity: 0.92; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
-    .btn-scenario { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 6px 10px; font-size: 11px; font-weight: 600; border-radius: 6px; cursor: pointer; margin-right: 6px; margin-bottom: 6px; }
+    .btn-scenario { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 7px 11px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; margin-right: 6px; margin-bottom: 8px; }
     .btn-scenario:hover { background: #293548; border-color: var(--primary); }
     .form-group { margin-bottom: 12px; }
     label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
@@ -77,6 +81,7 @@ router.get('/', (req, res) => {
     th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--card-border); }
     th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; }
     .scenarios-container { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--card-border); }
+    #inlineResult { margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; display: none; }
   </style>
 </head>
 <body>
@@ -109,7 +114,7 @@ router.get('/', (req, res) => {
 
         <!-- 1-Click Quick Scenario Presets -->
         <div class="scenarios-container">
-          <label style="margin-bottom: 6px; display: block;">⚡ 1-Click Test Scenarios:</label>
+          <label style="margin-bottom: 6px; display: block; color: var(--primary);">⚡ 1-Click Test Scenarios (Click any button):</label>
           <button type="button" class="btn-scenario" onclick="runScenario('authorized')">✔ 1. Authorized Teacher (201)</button>
           <button type="button" class="btn-scenario" onclick="runScenario('duplicate')">⚠️ 2. Duplicate Attendance (409)</button>
           <button type="button" class="btn-scenario" onclick="runScenario('student')">🚫 3. Student Write (403)</button>
@@ -117,7 +122,7 @@ router.get('/', (req, res) => {
           <button type="button" class="btn-scenario" onclick="runScenario('unenrolled')">❌ 5. Not Enrolled (422)</button>
         </div>
 
-        <form id="attendanceForm" onsubmit="return false;">
+        <form id="attendanceForm" onsubmit="event.preventDefault(); submitAttendance(); return false;">
           <div class="form-group">
             <label>Acting User (Header: x-user-id)</label>
             <select id="userId">
@@ -165,9 +170,13 @@ router.get('/', (req, res) => {
               <option value="excused">Excused</option>
             </select>
           </div>
-          <button type="button" id="submitBtn" class="btn" style="width: 100%; margin-top: 6px;" onclick="submitAttendance()">
+          
+          <button type="button" id="submitBtn" class="btn" style="width: 100%; margin-top: 6px;">
             Execute Attendance Request
           </button>
+
+          <!-- In-Place Visual Banner Right Below the Button -->
+          <div id="inlineResult"></div>
         </form>
       </div>
 
@@ -198,6 +207,12 @@ router.get('/', (req, res) => {
   </div>
 
   <script>
+    // Ensure date defaults to today if empty
+    const dateInput = document.getElementById('attDate');
+    if (!dateInput.value) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
     async function loadData() {
       try {
         const classesRes = await fetch('/api/v1/classes');
@@ -235,7 +250,6 @@ router.get('/', (req, res) => {
         document.getElementById('session').value = 'morning';
         document.getElementById('status').value = 'present';
       } else if (type === 'duplicate') {
-        // Same as seeded record
         document.getElementById('userId').value = 'usr-teacher-1';
         document.getElementById('classId').value = 'cls-math-101';
         document.getElementById('studentId').value = 'usr-student-1';
@@ -255,7 +269,7 @@ router.get('/', (req, res) => {
       } else if (type === 'unenrolled') {
         document.getElementById('userId').value = 'usr-teacher-1';
         document.getElementById('classId').value = 'cls-math-101';
-        document.getElementById('studentId').value = 'usr-student-3'; // enrolled in Science only
+        document.getElementById('studentId').value = 'usr-student-3';
         document.getElementById('attDate').value = '2026-11-12';
       }
       submitAttendance();
@@ -263,6 +277,10 @@ router.get('/', (req, res) => {
 
     async function submitAttendance() {
       const btn = document.getElementById('submitBtn');
+      const inlineResult = document.getElementById('inlineResult');
+      const output = document.getElementById('apiOutput');
+      const statusBadge = document.getElementById('responseStatus');
+
       const userId = document.getElementById('userId').value;
       const classId = document.getElementById('classId').value;
       const studentId = document.getElementById('studentId').value;
@@ -271,11 +289,13 @@ router.get('/', (req, res) => {
       const session = document.getElementById('session').value;
       const status = document.getElementById('status').value;
 
-      const output = document.getElementById('apiOutput');
-      const statusBadge = document.getElementById('responseStatus');
-
-      btn.innerText = 'Executing Request...';
+      btn.innerText = '⏳ Executing Request...';
       btn.style.opacity = '0.7';
+      inlineResult.style.display = 'block';
+      inlineResult.style.background = '#1e293b';
+      inlineResult.style.color = '#38bdf8';
+      inlineResult.style.border = '1px solid #334155';
+      inlineResult.innerHTML = '⏳ Sending attendance request to server...';
       output.innerText = 'Sending POST /api/v1/attendance request...';
 
       try {
@@ -290,44 +310,75 @@ router.get('/', (req, res) => {
 
         const json = await res.json();
         output.innerText = JSON.stringify(json, null, 2);
-
         statusBadge.style.display = 'inline-flex';
+
         if (res.status >= 200 && res.status < 300) {
           statusBadge.className = 'badge badge-success';
           statusBadge.style.background = 'rgba(34, 197, 94, 0.2)';
           statusBadge.style.color = '#22c55e';
           statusBadge.innerText = 'HTTP ' + res.status + ' SUCCESS (CREATED)';
+
+          inlineResult.style.background = 'rgba(34, 197, 94, 0.2)';
+          inlineResult.style.color = '#22c55e';
+          inlineResult.style.border = '1px solid #22c55e';
+          inlineResult.innerHTML = '✅ <strong>HTTP 201 CREATED:</strong> Attendance successfully recorded for <code>' + studentId + '</code>!';
         } else if (res.status === 403 || res.status === 401) {
           statusBadge.className = 'badge';
           statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
           statusBadge.style.color = '#ef4444';
           statusBadge.innerText = 'HTTP ' + res.status + ' FORBIDDEN (' + (json.error?.code || 'BLOCKED') + ')';
+
+          inlineResult.style.background = 'rgba(239, 68, 68, 0.2)';
+          inlineResult.style.color = '#ef4444';
+          inlineResult.style.border = '1px solid #ef4444';
+          inlineResult.innerHTML = '🚫 <strong>HTTP 403 FORBIDDEN:</strong> ' + (json.error?.message || 'Access Denied!');
         } else if (res.status === 409) {
           statusBadge.className = 'badge';
           statusBadge.style.background = 'rgba(245, 158, 11, 0.2)';
           statusBadge.style.color = '#f59e0b';
           statusBadge.innerText = 'HTTP 409 CONFLICT (DUPLICATE)';
+
+          inlineResult.style.background = 'rgba(245, 158, 11, 0.2)';
+          inlineResult.style.color = '#f59e0b';
+          inlineResult.style.border = '1px solid #f59e0b';
+          inlineResult.innerHTML = '⚠️ <strong>HTTP 409 DUPLICATE:</strong> ' + (json.error?.message || 'Attendance already recorded!');
         } else if (res.status === 422) {
           statusBadge.className = 'badge';
           statusBadge.style.background = 'rgba(245, 158, 11, 0.2)';
           statusBadge.style.color = '#f59e0b';
-          statusBadge.innerText = 'HTTP 422 UNPROCESSABLE (NOT ENROLLED)';
+          statusBadge.innerText = 'HTTP 422 UNPROCESSABLE';
+
+          inlineResult.style.background = 'rgba(245, 158, 11, 0.2)';
+          inlineResult.style.color = '#f59e0b';
+          inlineResult.style.border = '1px solid #f59e0b';
+          inlineResult.innerHTML = '❌ <strong>HTTP 422 UNPROCESSABLE:</strong> ' + (json.error?.message || 'Student not enrolled in class!');
         } else {
           statusBadge.className = 'badge';
           statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
           statusBadge.style.color = '#ef4444';
-          statusBadge.innerText = 'HTTP ' + res.status + ' ' + (json.error?.code || 'ERROR');
+          statusBadge.innerText = 'HTTP ' + res.status + ' ERROR';
+
+          inlineResult.style.background = 'rgba(239, 68, 68, 0.2)';
+          inlineResult.style.color = '#ef4444';
+          inlineResult.style.border = '1px solid #ef4444';
+          inlineResult.innerHTML = '❌ <strong>HTTP ' + res.status + ':</strong> ' + (json.error?.message || 'Error processing request');
         }
 
         // Refresh audit logs and classes
         await loadData();
       } catch (err) {
         output.innerText = 'Network Error: ' + err.message;
+        inlineResult.style.background = 'rgba(239, 68, 68, 0.2)';
+        inlineResult.style.color = '#ef4444';
+        inlineResult.innerHTML = '❌ <strong>Network Error:</strong> ' + err.message;
       } finally {
         btn.innerText = 'Execute Attendance Request';
         btn.style.opacity = '1';
       }
     }
+
+    // Attach click listener to button explicitly
+    document.getElementById('submitBtn').addEventListener('click', submitAttendance);
 
     // Initial load on page ready
     loadData();
