@@ -98,3 +98,4 @@ SELECT
 - [ ] Unauthorized teachers (`usr-teacher-3`) continue to be blocked with `403 Forbidden`.
 - [ ] Audit logs reflect the rollback and test verification actions.
 - [ ] Notify incident response team and document post-mortem.
+

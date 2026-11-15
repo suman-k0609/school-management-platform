@@ -49,3 +49,4 @@ fi
 echo -e "\n[PHASE 5] Post-Recovery Verification"
 curl -s "$BASE_URL/ready" || true
 echo -e "\n[SUCCESS] Resilience drill successfully completed."
+

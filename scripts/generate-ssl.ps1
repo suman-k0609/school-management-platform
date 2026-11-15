@@ -50,3 +50,4 @@ if (Get-Command openssl -ErrorAction SilentlyContinue) {
 
 Write-Host "[INFO] Certificate: $certPath"
 Write-Host "[INFO] Private Key: $keyPath"
+

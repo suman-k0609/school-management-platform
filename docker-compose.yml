@@ -125,3 +125,4 @@ volumes:
     driver: local
   app_logs:
     driver: local
+

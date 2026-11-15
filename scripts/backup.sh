@@ -49,3 +49,4 @@ find "$BACKUP_DIR" -type f -name "*.sql" -mtime +"$RETENTION_DAYS" -exec rm -f {
 echo "=================================================================="
 echo "BACKUP RUN COMPLETED"
 echo "=================================================================="
+

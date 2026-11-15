@@ -30,3 +30,4 @@ chmod 644 "$CERT_PATH"
 echo "[SUCCESS] SSL Certificate created:"
 echo "  Certificate: $CERT_PATH"
 echo "  Private Key: $KEY_PATH"
+

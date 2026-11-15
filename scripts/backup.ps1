@@ -67,3 +67,4 @@ Get-ChildItem -Path $BackupDir -Filter "*.sql" | Where-Object { $_.LastWriteTime
 Write-Host "=================================================================="
 Write-Host "BACKUP RUN COMPLETED"
 Write-Host "=================================================================="
+

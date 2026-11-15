@@ -204,3 +204,4 @@ sequenceDiagram
 | **Tampering / Unauthorized Access** | Strict RBAC; only assigned teachers can write attendance; full audit trail for all events. |
 | **Vulnerable Dependencies / Base Image** | Automated `npm audit --audit-level=high` and Aqua Trivy container security scans in GitHub Actions CI. |
 | **Secret Leakage** | All credentials injected via environment variables; `.gitignore` prevents committing secrets or `.env` files. |
+

@@ -46,3 +46,4 @@ describe('Health and Observability Endpoints', () => {
     assert.ok(res.body.uptimeSeconds >= 0);
   });
 });
+

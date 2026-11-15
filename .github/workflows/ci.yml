@@ -151,3 +151,4 @@ jobs:
           echo "Build Version: ${{ steps.meta.outputs.tag_build }}"
           echo "Docker Image ID: $(docker images -q ${{ steps.meta.outputs.tag_sha }})"
           echo "=================================================================="
+

@@ -188,3 +188,4 @@ In the event of accidental data corruption or hardware migration:
 1. **Symptom**: POST `/api/v1/attendance` returns 409 Conflict.
 2. **Diagnosis**: Attendance for the specified `(class_id, student_id, date, session)` was already recorded.
 3. **Remediation**: Check existing record via `GET /api/v1/classes/:id/attendance?date=YYYY-MM-DD&session=morning`.
+
