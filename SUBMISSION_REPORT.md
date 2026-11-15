@@ -15,7 +15,7 @@
 | **Assigned Project** | Cloud Deployment & CI/CD – School Management Platform |
 | **Repository URL** | https://github.com/suman-k0609/school-management-platform |
 | **Primary Branch** | `main` |
-| **Final Commit ID** | `ea3b84d` (Branch: `main`) |
+| **Final Commit ID** | `ec861d2` (Branch: `main`) |
 | **Demo Video Link (3–5 mins)**| *[Insert Loom / YouTube / Google Drive Video Link]* |
 | **Deployment URL** | `https://school-mgmt-suman.loca.lt` (Public Tunnel) / `http://localhost:3000` (Local) |
 
