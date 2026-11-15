@@ -64,4 +64,3 @@ describe('Classes API Endpoints', () => {
     assert.equal(res.body.error.code, 'CLASS_NOT_FOUND');
   });
 });
-

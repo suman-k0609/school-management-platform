@@ -15,9 +15,10 @@ let dashboardHtml = '';
 
 try {
   dashboardHtml = fs.readFileSync(dashboardHtmlPath, 'utf8');
-} catch (err) {
+} catch {
   // Fallback in case of path resolution variance
-  dashboardHtml = '<!DOCTYPE html><html><body><h1>School Management Platform</h1><p>Dashboard loading error</p></body></html>';
+  dashboardHtml =
+    '<!DOCTYPE html><html><body><h1>School Management Platform</h1><p>Dashboard loading error</p></body></html>';
 }
 
 // Root route: provides interactive UI in browsers, JSON overview for API clients
@@ -27,7 +28,8 @@ router.get('/', (req, res) => {
   if (!acceptsHtml) {
     return res.status(200).json({
       name: 'School Management Platform API',
-      description: 'DevOps & Cloud Engineering Platform for Student, Class, and Attendance Management',
+      description:
+        'DevOps & Cloud Engineering Platform for Student, Class, and Attendance Management',
       version: config.version,
       status: 'UP',
       endpoints: {
@@ -52,7 +54,7 @@ router.get('/', (req, res) => {
   try {
     const freshHtml = fs.readFileSync(dashboardHtmlPath, 'utf8');
     return res.send(freshHtml);
-  } catch (e) {
+  } catch {
     return res.send(dashboardHtml);
   }
 });
